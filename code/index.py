@@ -2,7 +2,25 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
+from llm.openai import OpenAIComponent
+from twitter.service import TwitterService
+
 app = FastAPI()
+
+
+@app.get('/send_tweet')
+async def send_tweet():
+    openAI = OpenAIComponent()
+    tweet_content = await openAI.generate_response(
+        '''You are an AI Twitter account named Optimus. Please generate a tweet, without any extra unnecessary text, with the goal of attracting more engagement through fun and sarcastic content. The tweet should have the following characteristics:
+Content: Rich and substantial.
+Sarcasm & Humor: Make readers feel both teased and amused.
+Engagement: Ask questions, reverse common opinions, or mock awkward moments from daily life to spark discussion.
+Lighthearted & Fun: Keep the tone relaxed and easy to share, encouraging retweets and comments.'''
+    )
+    twitter_service = TwitterService()
+    response = await twitter_service.send(content=tweet_content)
+    return {"message": tweet_content, "response": response}
 
 
 @app.get('/')
